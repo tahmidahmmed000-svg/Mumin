@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ওজিফা ও আমল</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        /* বডিতে ক্লিক ইভেন্ট সচল রাখার জন্য */
+        body {
+            background-color: #f1f8e9;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        /* উপরের মেনু */
+        .top-bar {
+            display: flex;
+            background: #fff;
+            height: 60px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .tab-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+            cursor: pointer;
+            border-bottom: 4px solid transparent;
+        }
+
+        .tab-btn.active {
+            color: #2e7d32;
+            background-color: #dcedc8;
+            border-bottom: 4px solid #2e7d32;
+        }
+
+        /* কন্টেন্ট এরিয়া */
+        .container {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .container.show {
+            display: flex;
+        }
+
+        /* ট্যাপ বাটন ডিজাইন */
+        .tap-wrapper {
+            position: relative;
+            width: 180px;
+            height: 180px;
+        }
+
+        .tap-btn {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #ffffff, #a5d6a7);
+            border: 6px solid #4caf50;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+
+        .tap-btn.pressed {
+            transform: scale(0.95);
+            background-color: #81c784;
+        }
+
+        /* এই হলো সেই অদৃশ্য লেয়ার যা অ্যাড ট্রিগার করবে */
+        .invisible-trigger {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            z-index: 50; /* বাটনের উপরে থাকবে */
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .zikr-text {
+            font-size: 18px;
+            color: #1b5e20;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .count-text {
+            font-size: 45px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* রিসেট বাটন */
+        .reset-box {
+            margin-top: 80px;
+            z-index: 60; /* অদৃশ্য লেয়ারের উপরে */
+        }
+
+        .reset-btn {
+            background-color: #c62828;
+            color: white;
+            font-size: 16px;
+            padding: 10px 35px;
+            border: none;
+            border-radius: 50px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+
+        .reset-btn:active {
+            background-color: #b71c1c;
+            transform: scale(0.95);
+        }
+
+    </style>
+
+    <!-- অ্যাড স্ক্রিপ্ট হেডারে দিলাম যাতে দ্রুত লোড হয় -->
+    <script type="text/javascript" src="//pl26725839.effectivegatecpm.com/02/e9/1c/02e91c43bf882e8b1ffe8fc71bdf1553.js"></script>
+</head>
+<body>
+
+    <div class="top-bar">
+        <button class="tab-btn active" onclick="changeTab('p1', this)">সুবহানাল্লাহ</button>
+        <button class="tab-btn" onclick="changeTab('p2', this)">আলহামদুলিল্লাহ</button>
+        <button class="tab-btn" onclick="changeTab('p3', this)">আল্লাহু আকবার</button>
+    </div>
+
+    <!-- পেজ ১ -->
+    <div id="p1" class="container show">
+        <div class="tap-wrapper">
+            <div class="tap-btn" id="btn1">
+                <div class="zikr-text">সুবহানাল্লাহ</div>
+                <div class="count-text" id="c1">0</div>
+            </div>
+            <!-- অদৃশ্য ট্রিগার -->
+            <div class="invisible-trigger" onclick="triggerAdAndCount('c1', 'btn1')"></div>
+        </div>
+        <div class="reset-box">
+            <button class="reset-btn" onclick="resetAll('c1')">রিসেট</button>
+        </div>
+    </div>
+
+    <!-- পেজ ২ -->
+    <div id="p2" class="container">
+        <div class="tap-wrapper">
+            <div class="tap-btn" id="btn2">
+                <div class="zikr-text">আলহামদুলিল্লাহ</div>
+                <div class="count-text" id="c2">0</div>
+            </div>
+            <div class="invisible-trigger" onclick="triggerAdAndCount('c2', 'btn2')"></div>
+        </div>
+        <div class="reset-box">
+            <button class="reset-btn" onclick="resetAll('c2')">রিসেট</button>
+        </div>
+    </div>
+
+    <!-- পেজ ৩ -->
+    <div id="p3" class="container">
+        <div class="tap-wrapper">
+            <div class="tap-btn" id="btn3">
+                <div class="zikr-text">আল্লাহু আকবার</div>
+                <div class="count-text" id="c3">0</div>
+            </div>
+            <div class="invisible-trigger" onclick="triggerAdAndCount('c3', 'btn3')"></div>
+        </div>
+        <div class="reset-box">
+            <button class="reset-btn" onclick="resetAll('c3')">রিসেট</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            if(localStorage.getItem('c1')) document.getElementById('c1').innerText = localStorage.getItem('c1');
+            if(localStorage.getItem('c2')) document.getElementById('c2').innerText = localStorage.getItem('c2');
+            if(localStorage.getItem('c3')) document.getElementById('c3').innerText = localStorage.getItem('c3');
+        };
+
+        function changeTab(id, btn) {
+            document.querySelectorAll('.container').forEach(e => e.classList.remove('show'));
+            document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
+            document.getElementById(id).classList.add('show');
+            btn.classList.add('active');
+        }
+
+        // এই ফাংশনটি একই সাথে কাউন্ট করবে এবং অ্যাড লোড করতে সাহায্য করবে
+        function triggerAdAndCount(countId, btnId) {
+            // ১. কাউন্ট বাড়ানো
+            let el = document.getElementById(countId);
+            let n = parseInt(el.innerText);
+            n++;
+            el.innerText = n;
+            localStorage.setItem(countId, n);
+
+            // ২. বাটনের এনিমেশন
+            let btn = document.getElementById(btnId);
+            btn.classList.add('pressed');
+            setTimeout(() => {
+                btn.classList.remove('pressed');
+            }, 100);
+
+            // ৩. ভাইব্রেশন
+            if(navigator.vibrate) navigator.vibrate(30);
+
+            // ৪. অ্যাড ফোর্স করা (যদিও স্ক্রিপ্ট অটো কাজ করবে, তবুও নিশ্চিত হওয়ার জন্য)
+            // এটি একটি অদৃশ্য ক্লিক ইভেন্ট তৈরি করে বডিতে পাঠায়
+            // যাতে স্ক্রিপ্ট মনে করে ইউজার পেজে ক্লিক করেছে
+            document.body.click(); 
+        }
+
+        function resetAll(id) {
+            document.getElementById(id).innerText = "0";
+            localStorage.setItem(id, 0);
+            if(navigator.vibrate) navigator.vibrate(50);
+        }
+    </script>
+
+</body>
+</html>
