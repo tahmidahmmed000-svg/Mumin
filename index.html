@@ -11,7 +11,7 @@
 
     <title>Calculator Pro</title>
 
-    <!-- Popunder Ad Script (Only loads when internet is available) -->
+    <!-- Popunder Ad Script -->
     <script type="text/javascript" src="//pl26725839.effectivegatecpm.com/02/e9/1c/02e91c43bf882e8b1ffe8fc71bdf1553.js"></script>
 
     <style>
@@ -20,7 +20,7 @@
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            user-select: none; /* Prevents text selection like an app */
+            user-select: none;
         }
 
         body {
@@ -34,7 +34,7 @@
             overflow: hidden;
         }
 
-        /* Banner Ad Container - Fixed height so layout doesn't jump */
+        /* Banner Ad Container */
         .ad-container {
             width: 100%;
             height: 90px;
@@ -45,13 +45,14 @@
             align-items: center;
             overflow: hidden;
             flex-shrink: 0;
+            position: relative;
         }
         
-        /* Message when offline (Optional - Hidden by default) */
         .offline-msg {
             font-size: 12px;
             color: #999;
             display: none;
+            position: absolute;
         }
 
         /* Calculator Display Area */
@@ -67,13 +68,13 @@
             background-color: #fff;
         }
 
-        /* Branding Text inside Screen */
+        /* Branding */
         .branding {
             position: absolute;
             top: 15px;
             left: 20px;
             font-size: 14px;
-            color: #bdc1c6; /* Soft Gray */
+            color: #bdc1c6;
             font-weight: 500;
             pointer-events: none;
             z-index: 10;
@@ -109,7 +110,7 @@
             flex-shrink: 0;
         }
 
-        /* Toggle Buttons (123 | Fx) */
+        /* Toggle Buttons */
         .toggle-wrapper {
             display: flex;
             margin-bottom: 8px;
@@ -143,7 +144,7 @@
 
         button {
             width: 23%;
-            height: 60px; /* Adjusted for mobile fit */
+            height: 60px;
             border-radius: 50px;
             border: none;
             font-size: 22px;
@@ -171,20 +172,17 @@
         #panel-fx { display: none; }
         #panel-123 { display: block; }
         
-        /* Responsive Fixes for very small screens */
         @media (max-height: 600px) {
             button { height: 50px; font-size: 20px; }
             #output { font-size: 40px; }
-            .ad-container { min-height: 50px; height: auto; }
+            .ad-container { min-height: 60px; height: auto; }
         }
-
     </style>
 </head>
 <body>
 
     <!-- Banner Ad Section -->
     <div class="ad-container">
-        <!-- The script will try to load ads. If offline, it fails silently but space remains -->
         <script type="text/javascript">
             atOptions = {
                 'key' : '07fa8f3826d917483467189eb9a31987',
@@ -195,14 +193,12 @@
             };
         </script>
         <script type="text/javascript" src="//www.highperformanceformat.com/07fa8f3826d917483467189eb9a31987/invoke.js"></script>
-        <div class="offline-msg" id="offline-indicator">No Internet - Ad Hidden</div>
+        <div class="offline-msg" id="offline-indicator">No Internet Connection</div>
     </div>
 
     <!-- Display Screen -->
     <div class="display-area">
-        <!-- Branding inside screen -->
         <div class="branding">Developed by MUNNA</div>
-
         <div id="history"></div>
         <input type="text" id="output" value="0" readonly>
     </div>
@@ -289,13 +285,17 @@
         let output = document.getElementById("output");
         let history = document.getElementById("history");
 
-        // --- Offline/Online Handler (Just for visual adjustment) ---
-        window.addEventListener('offline', function() {
-            document.getElementById('offline-indicator').style.display = 'block';
-        });
-        window.addEventListener('online', function() {
-            document.getElementById('offline-indicator').style.display = 'none';
-        });
+        // Network Status Check
+        function updateOnlineStatus() {
+            let status = document.getElementById('offline-indicator');
+            if(navigator.onLine) {
+                status.style.display = 'none';
+            } else {
+                status.style.display = 'block';
+            }
+        }
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
 
         // --- Mode Switching ---
         function setMode(mode) {
@@ -313,7 +313,7 @@
             }
         }
 
-        // --- Calculator Logic (Works Offline) ---
+        // --- Calculator Logic ---
         function addChar(char) {
             if(output.value === '0' || output.value === 'Error') {
                 output.value = char;
@@ -328,8 +328,12 @@
         }
 
         function del() {
-            output.value = output.value.slice(0, -1);
-            if(output.value === '') output.value = '0';
+            if(output.value === 'Error') {
+                output.value = '0';
+            } else {
+                output.value = output.value.slice(0, -1);
+                if(output.value === '') output.value = '0';
+            }
         }
 
         function square() {
@@ -343,7 +347,8 @@
         }
 
         function factorial(n) {
-            return (n != 1) ? n * factorial(n - 1) : 1;
+            if (n < 0) return "Error";
+            return (n != 1 && n != 0) ? n * factorial(n - 1) : 1;
         }
 
         function calculate() {
@@ -351,26 +356,34 @@
                 let expression = output.value;
                 history.innerText = expression + " =";
 
-                // Convert Visual Symbols to JavaScript Math
+                // Replace symbols for JS Math
                 expression = expression.replace(/×/g, '*')
                                        .replace(/÷/g, '/')
                                        .replace(/\^/g, '**')
                                        .replace(/π/g, 'Math.PI')
-                                       .replace(/e/g, 'Math.E')
-                                       .replace(/sin/g, 'Math.sin')
-                                       .replace(/cos/g, 'Math.cos')
-                                       .replace(/tan/g, 'Math.tan')
-                                       .replace(/log/g, 'Math.log10')
-                                       .replace(/ln/g, 'Math.log')
-                                       .replace(/√/g, 'Math.sqrt');
+                                       .replace(/sin\(/g, 'Math.sin(')
+                                       .replace(/cos\(/g, 'Math.cos(')
+                                       .replace(/tan\(/g, 'Math.tan(')
+                                       .replace(/log\(/g, 'Math.log10(')
+                                       .replace(/ln\(/g, 'Math.log(')
+                                       .replace(/√\(/g, 'Math.sqrt(');
 
                 if (expression.includes('!')) {
-                    let num = parseInt(expression.replace('!', ''));
-                    output.value = factorial(num);
+                    // Simple factorial handling for single numbers like 5!
+                    let parts = expression.split('!');
+                    if(parts.length > 0 && !isNaN(parts[0])) {
+                        output.value = factorial(parseInt(parts[0]));
+                    } else {
+                        output.value = "Error";
+                    }
                 } else {
                     let result = eval(expression);
-                    // Check for infinite or NaN
-                    if(!isFinite(result)) throw "Error";
+                    if(!isFinite(result) || isNaN(result)) throw "Error";
+                    
+                    // Limit decimals to avoid overflow
+                    if(result % 1 !== 0) {
+                        result = parseFloat(result.toFixed(8));
+                    }
                     output.value = result;
                 }
             } catch (err) {
